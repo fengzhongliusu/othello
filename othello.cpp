@@ -12,7 +12,7 @@ class othello_ai{
 	pair<int, int> get();
 	int get_eval(string s,int color);   //算出给定局面的估价值
 	int value(int x,int y,int col);   //获取每一个点的估价值
-	int eval_node(int depth,int color);  //返回倒退值
+	int eval_node(int depth,int color,int cmp_val);  //返回倒退值
 };
 
 void othello_ai::init(int color, string s){
@@ -26,6 +26,7 @@ void othello_ai::move(int color, int x, int y){
 pair<int, int> othello_ai::get(){
 	int init_color, depth, ans_size;
 	int b_index, b_value, temp_value;
+	int cmp_val;
 	string ori_string;
 	vector<pair<int,int> > ans;
 
@@ -36,12 +37,14 @@ pair<int, int> othello_ai::get(){
 	ans_size = ans.size();
 	depth = 0;
 
+	std::cerr<<"ori_string:"<<ori_string<<endl;
+
 	init_color = (o.mycolor==1)?2:1;
 
 	std::cerr<<"root-->allmove size is "<<ans_size<<endl;		
 	for(int i=0; i<ans_size; i++){
 		o.play(o.mycolor,ans[i].first,ans[i].second);
-		temp_value = eval_node(depth+1,init_color);
+		temp_value = eval_node(depth+1,init_color,b_value);
 		std::cerr<<"root--->move["<<i<<"] value is "<<temp_value<<endl;
 		o.init(o.mycolor,ori_string);
 		if(b_value < temp_value){
@@ -49,17 +52,19 @@ pair<int, int> othello_ai::get(){
 			b_index = i;
 		}
 	}
+	std::cerr<<"end string:"<<o.tostring()<<endl;
 	std::cerr<<"root--->choose move["<<b_index<<"]\n";
 	return ans[b_index];
 }
 
 
-int othello_ai::eval_node(int depth,int color){
+
+int othello_ai::eval_node(int depth,int color,int cmp_val){
 	if(get_time()>1950){ //超时
 		std::cerr<<"timeout..\n";
 		return get_eval(o.tostring(),color);
 	}
-	if(depth == 4)  // 达到指定的搜索深度
+	if(depth == 6)  // 达到指定的搜索深度
 		return get_eval(o.tostring(),color);
 
 	int best_value,temp_value;
@@ -80,17 +85,29 @@ int othello_ai::eval_node(int depth,int color){
 
 	for(int i=0;i<chd_size;i++){
 		o.play(color,ans[i].first,ans[i].second);
-		temp_value = eval_node(depth+1,op_col);
-		std::cerr<<depth<<"--ans["<<i<<"] value is "<<temp_value<<endl;
+		temp_value = eval_node(depth+1,op_col,best_value);
+		
+		if(depth % 2 == 0 && cmp_val <= temp_value){   //减枝
+			std::cerr<<"减枝->depth:"<<depth<<" cmp_val:"<<cmp_val<<" temp_value"<<temp_value<<endl;
+			return temp_value;
+		}
+		if(depth % 2 != 0 && cmp_val >= temp_value){   //减枝
+			std::cerr<<"减枝->depth:"<<depth<<" cmp_val:"<<cmp_val<<" temp_value"<<temp_value<<endl;
+			return temp_value;
+		}
+
+		//std::cerr<<depth<<"--ans["<<i<<"] value is "<<temp_value<<endl;
 		o.init(color,ori_string);
 		if(depth % 2 ==0 && best_value < temp_value)
 			best_value = temp_value;
 		else if(depth % 2 != 0 && best_value > temp_value)
 			best_value = temp_value;
 	}
-	std::cerr<<depth<<"--node value is "<<best_value<<endl;
+	//std::cerr<<depth<<"--node value is "<<best_value<<endl;
 	return best_value;
 }
+
+
 
 //行动力与棋子分值各占50%
 int othello_ai::get_eval(string s,int color){
@@ -128,11 +145,13 @@ int othello_ai::get_eval(string s,int color){
 			eval -= 0.5*o.allmove(op_col).size();
 	}
 	else{
-		std::cerr<<"game end\n";
+		//std::cerr<<"game end\n";
 	}
 
 	return eval;
 }
+
+
 
 int othello_ai::value(int x,int y,int col){
 	if((x==0 && y==0) || (x==0 && y==15) || (x==15 && y==0) || (x==15 && y==15)) //corner
