@@ -37,8 +37,6 @@ pair<int, int> othello_ai::get(){
 	ans_size = ans.size();
 	depth = 0;
 
-	std::cerr<<"ori_string:"<<ori_string<<endl;
-
 	init_color = (o.mycolor==1)?2:1;
 
 	std::cerr<<"root-->allmove size is "<<ans_size<<endl;		
@@ -51,8 +49,7 @@ pair<int, int> othello_ai::get(){
 			b_value = temp_value;
 			b_index = i;
 		}
-	}
-	std::cerr<<"end string:"<<o.tostring()<<endl;
+	}	
 	std::cerr<<"root--->choose move["<<b_index<<"]\n";
 	return ans[b_index];
 }
@@ -60,11 +57,11 @@ pair<int, int> othello_ai::get(){
 
 
 int othello_ai::eval_node(int depth,int color,int cmp_val){
-	if(get_time()>1950){ //超时
+	if(get_time()>1995){ //超时
 		std::cerr<<"timeout..\n";
 		return get_eval(o.tostring(),color);
 	}
-	if(depth == 6)  // 达到指定的搜索深度
+	if(depth == 4)  // 达到指定的搜索深度
 		return get_eval(o.tostring(),color);
 
 	int best_value,temp_value;
@@ -77,8 +74,9 @@ int othello_ai::eval_node(int depth,int color,int cmp_val){
 	best_value = (depth%2==0)?-0x40000:0x40000;
 	ori_string = o.tostring();
 
-	if(o.canmove(color) == false)  //color颜色方无法走
-		return get_eval(o.tostring(),op_col);
+	if(o.canmove(color) == false){  //color颜色方无法走
+		return (depth%2==0)?-0x40000:0x40000;
+	}
 
 	ans = o.allmove(color);  //获取所有可下位置列表
 	chd_size = ans.size();
@@ -87,17 +85,15 @@ int othello_ai::eval_node(int depth,int color,int cmp_val){
 		o.play(color,ans[i].first,ans[i].second);
 		temp_value = eval_node(depth+1,op_col,best_value);
 		
-		if(depth % 2 == 0 && cmp_val <= temp_value){   //减枝
-			std::cerr<<"减枝->depth:"<<depth<<" cmp_val:"<<cmp_val<<" temp_value"<<temp_value<<endl;
+		if(depth % 2 == 0 && cmp_val <= temp_value){   //减枝			
 			return temp_value;
 		}
-		if(depth % 2 != 0 && cmp_val >= temp_value){   //减枝
-			std::cerr<<"减枝->depth:"<<depth<<" cmp_val:"<<cmp_val<<" temp_value"<<temp_value<<endl;
+		if(depth % 2 != 0 && cmp_val >= temp_value){   //减枝			
 			return temp_value;
 		}
 
 		//std::cerr<<depth<<"--ans["<<i<<"] value is "<<temp_value<<endl;
-		o.init(color,ori_string);
+		o.init(o.mycolor,ori_string);
 		if(depth % 2 ==0 && best_value < temp_value)
 			best_value = temp_value;
 		else if(depth % 2 != 0 && best_value > temp_value)
@@ -129,9 +125,9 @@ int othello_ai::get_eval(string s,int color){
 			sum -= value(x,y,op_col);
 	}
 
-	eval += 0.5*sum;
+	// eval += 0.5*sum;
 
-	op_col = (color==1)?2:1;   //next person to put
+	/*op_col = (color==1)?2:1;   //next person to put
 	if(o.canmove(color)){
 		if(color== o.mycolor)  //下一步我方走
 			eval += 0.5*o.allmove(color).size();
@@ -146,9 +142,9 @@ int othello_ai::get_eval(string s,int color){
 	}
 	else{
 		//std::cerr<<"game end\n";
-	}
+	}*/
 
-	return eval;
+	return sum;
 }
 
 
@@ -157,42 +153,22 @@ int othello_ai::value(int x,int y,int col){
 	if((x==0 && y==0) || (x==0 && y==15) || (x==15 && y==0) || (x==15 && y==15)) //corner
 		return 100;
 
-	if((x==0 && y==1) || (x==1 && y==0) || (x==1 && y==1))
-		if(o.is(col,0,0))
-			return 42;
-		else if(o.is(0,0,0))
+	if((x==0 && y==1) || (x==1 && y==0) || (x==1 && y==1))		
 			return -100;
-		else
-			return 0;
 
 	if((x==0 && y==14) || (x==1 && y==14) || (x==1 && y==15))
-		if(o.is(col,0,15))
-			return 42;
-		else if(o.is(0,0,15))
 			return -100;
-		else
-			return 0;
 
 	if((x==14 && y==0) || (x==14 && y==1) || (x==15 && y==1))
-		if(o.is(col,15,0))
-			return 42;
-		else if(o.is(0,15,0))
 			return -100;
-		else
-			return 0;
 
 	if((x==14 && y==14) || (x==14 && y==15) || (x==15 && y==15))
-		if(o.is(col,15,15))
-			return 42;
-		else if(o.is(0,15,15))
 			return -100;
-		else
-			return 0;
 
 	if(x == 0 || x == 15 || y == 0 || y == 15)   //border
-		return 42;
+		return 32;
 
-	return 6;
+	return 1;
 }
 
 
