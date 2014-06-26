@@ -106,45 +106,30 @@ int othello_ai::eval_node(int depth,int color,int cmp_val){
 
 
 //行动力与棋子分值各占50%
-int othello_ai::get_eval(string s,int color){
-	int sum;
-	int x,y;
-	int op_col;
-	int eval;
+int othello_ai::get_eval(string s,int color)
+{
+	int value;
+	vector<pair<int,int> > ans;
 
-	eval = 0;
-	sum = 0;
-	op_col = (o.mycolor==1)?2:1;
-
-	for(int i=0; i<s.size();i++){
-		x = i/16;
-		y = i%16;
-		if(s.at(i)-0x30 == o.mycolor)
-			sum += value(x,y,o.mycolor);
-		else if(s.at(i)-0x30 == op_col)
-			sum -= value(x,y,op_col);
-	}
-
-	// eval += 0.5*sum;
-
-	/*op_col = (color==1)?2:1;   //next person to put
-	if(o.canmove(color)){
-		if(color== o.mycolor)  //下一步我方走
-			eval += 0.5*o.allmove(color).size();
-		else 
-			eval -= 0.5*o.allmove(color).size();
-	}
-	else if(o.canmove(op_col)){
-		if(op_col== o.mycolor)
-			eval += 0.5*o.allmove(op_col).size();
-		else 
-			eval -= 0.5*o.allmove(op_col).size();
+	if(!o.canmove(o.mycolor)){
+		value = 0;
 	}
 	else{
-		//std::cerr<<"game end\n";
-	}*/
+		ans = o.allmove(o.mycolor);
+		value = ans.size();	
+	}
 
-	return sum;
+	if(o.is(o.mycolor,0,0) || o.is(o.mycolor,0,15)
+		|| o.is(o.mycolor,15,0) || o.is(o.mycolor,15,15))  //corner
+		value += 128;	
+	else{
+		if(o.is(o.mycolor,0,1) || o.is(o.mycolor,1,0) || o.is(o.mycolor,1,1)
+			|| o.is(o.mycolor,0,14) || o.is(o.mycolor,1,14) || o.is(o.mycolor,1,15)
+			|| o.is(o.mycolor,14,0) || o.is(o.mycolor,14,1) || o.is(o.mycolor,15,1)
+			|| o.is(o.mycolor,14,14) || o.is(o.mycolor,14,15) || o.is(o.mycolor,15,14))
+			value += -128;
+	}
+	return value;
 }
 
 
