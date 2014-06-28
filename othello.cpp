@@ -70,10 +70,8 @@ pair<int, int> othello_ai::get(){
 		if(temp_value == 0x40000 || temp_value == -0x40000)
 			break;
 
-		if(temp_value == 0x88888){
-			std::cerr<<"get win..\n";
-			return order_ans[i];
-		}
+		if(temp_value == 0x88888)			
+			return order_ans[i];		
 
 		if(b_value < temp_value){
 			b_value = temp_value;
@@ -110,15 +108,23 @@ int othello_ai::eval_node(int depth,int color,int cmp_val){
 	if(!o.canmove(color)){  //color颜色方无法走		
 		if(!o.canmove(op_col)){
 			if(color == o.mycolor){
-				if(o.count(o.mycolor) >= o.count(op_col))
+				if(o.count(o.mycolor) >= o.count(op_col)){
+					std::cerr<<"get win"<<endl;
 					return 0x88888;
-				else
+				}
+				else{
+					std::cerr<<"get lose"<<endl;
 					return -0x50000;
+				}
 			} else {				
-				if(o.count(o.mycolor) >= o.count(color))
+				if(o.count(o.mycolor) >= o.count(color)){
+					std::cerr<<"get win"<<endl;
 					return 0x88888;
-				else
+				}
+				else{
+					std::cerr<<"get lose"<<endl;
 					return -0x50000;
+				}
 			}
 		}
 		else{				
@@ -183,56 +189,6 @@ int othello_ai::get_eval(string s,int g)
 	double score;
 	double pown_val, mv_val, front_val, corner_val, side_val;
 
-	//endgame		
-	if(o.count(0) <= 6) {   
-		for(int i=0; i<16; i++)
-			for(int j=0; j<16; j++)
-				if(o.is(o.mycolor,i,j))
-					p_val++;
-				else if(o.is(op_color,i,j))
-					p_val--;
-		return p_val;		
-	}
-	
-	for(int i=0; i<16; i++)
-		for(int j=0; j<16; j++){
-			if(o.is(o.mycolor,i,j)){
-				p_val += value(i,j);
-				my_pown++;
-			}
-			else if(o.is(op_color,i,j)){
-				p_val -= value(i,j);
-				op_pown++;
-			}
-			if(!o.is(0,i,j)){			
-				for(int k = 0; k<8; k++){
-					x = i + round_x[k];
-					y = j + round_y[k];
-					if(x>=0 && x<16 && y>=0 && y<16 && o.is(0,x,y)){						
-						if(o.is(o.mycolor,i,j))				
-							my_front_pown++;
-						else 
-							op_front_pown++;
-						break;
-					}
-				}				
-			}
-		}
-	//num of pown
-	if(my_pown > op_pown)
-		pown_val = 100.0*my_pown /(my_pown + op_pown);
-	else if(my_pown < op_pown)
-		pown_val = -100.0*op_pown/ (my_pown + op_pown);
-	else	
-		pown_val = 0;
-
-	// num of pown outside
-	if(my_front_pown > op_front_pown)
-		front_val = -100.0*my_front_pown/(my_front_pown + op_front_pown);
-	else if(my_front_pown < op_front_pown)
-		front_val = 100.0 * op_front_pown/ (my_front_pown + op_front_pown);
-	else 
-		front_val = 0;
 
 	//corner 
 	if(o.is(o.mycolor,0,0)) my_corner++;
@@ -280,6 +236,60 @@ int othello_ai::get_eval(string s,int g)
 	}
 
 	side_val = -12.5 * (my_c_s - op_c_s);
+
+	//endgame		
+	if(o.count(0) <= 16) {   
+		for(int i=0; i<16; i++)
+			for(int j=0; j<16; j++)
+				if(o.is(o.mycolor,i,j))
+					p_val++;
+				else if(o.is(op_color,i,j))
+					p_val--;
+		score = 1000*corner_val + 500*side_val + 100 * p_val;
+		return score;		
+	}
+	
+
+	//count pown
+	for(int i=0; i<16; i++)
+		for(int j=0; j<16; j++){
+			if(o.is(o.mycolor,i,j)){
+				p_val += value(i,j);
+				my_pown++;
+			}
+			else if(o.is(op_color,i,j)){
+				p_val -= value(i,j);
+				op_pown++;
+			}
+			if(!o.is(0,i,j)){			
+				for(int k = 0; k<8; k++){
+					x = i + round_x[k];
+					y = j + round_y[k];
+					if(x>=0 && x<16 && y>=0 && y<16 && o.is(0,x,y)){						
+						if(o.is(o.mycolor,i,j))				
+							my_front_pown++;
+						else 
+							op_front_pown++;
+						break;
+					}
+				}				
+			}
+		}
+	//num of pown
+	if(my_pown > op_pown)
+		pown_val = 100.0*my_pown /(my_pown + op_pown);
+	else if(my_pown < op_pown)
+		pown_val = -100.0*op_pown/ (my_pown + op_pown);
+	else	
+		pown_val = 0;
+
+	// num of pown outside
+	if(my_front_pown > op_front_pown)
+		front_val = -100.0*my_front_pown/(my_front_pown + op_front_pown);
+	else if(my_front_pown < op_front_pown)
+		front_val = 100.0 * op_front_pown/ (my_front_pown + op_front_pown);
+	else 
+		front_val = 0;
 
 	//corner side side
 	if(o.is(0,0,0) && o.is(0,0,1) && o.is(0,1,0) && o.is(0,1,1)){
