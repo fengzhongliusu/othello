@@ -347,10 +347,10 @@ int othello_ai::get_eval(string s,int g)
 		mv_val = 0;
 
    if(g == 0){
-   		if(o.count(0) > 226)
+   		if(o.count(0) > 230)
 			score = 15*pown_val + 1000 * corner_val + 500 * side_val + 15 * p_val;	
 		else
-			score = 10*pown_val + 1000 * corner_val + 500 * side_val + 80 * mv_val + 90*front_val + 10 * p_val;			
+			score = 10*pown_val + 1000 * corner_val + 500 * side_val + 50 * pown_3 + 80 * mv_val + 90*front_val + 9 * p_val;			
    }
    else	
    		score = 8*pown_val + 800 * corner_val + 400 * side_val + 300 * mv_val + 400*front_val + 8 * p_val;	
@@ -363,12 +363,12 @@ int othello_ai::value(int x,int y)
 	int val[16][16] = {
 		{40,0,20,20,20,13,12,12},
 		{0,0,2,2,2,2,2,2},
-		{20,2,6,6,6,6,6,6},
-		{20,2,6,3,3,3,3,3},
-		{20,2,6,3,4,4,4,4},
-		{13,2,6,3,4,2,2,2},
-		{12,2,6,3,4,2,1,1},
-		{12,2,6,3,4,2,1,0}		
+		{20,2,8,8,8,8,8,8},
+		{20,2,8,3,3,3,3,3},
+		{20,2,8,3,4,4,4,4},
+		{13,2,8,3,4,2,2,2},
+		{12,2,8,3,4,2,1,1},
+		{12,2,8,3,4,2,1,0}		
 	};	
 
 	if(x<8 && y<8)
