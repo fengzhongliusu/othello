@@ -7,7 +7,6 @@
 class othello_ai{
 	othello16 o;//实例化othello16类		
 	int pari;
-	int glb_depth;
 	public:
 	void init(int color, string s);
 	void move(int color, int x, int y);
@@ -45,13 +44,9 @@ pair<int, int> othello_ai::get(){
 	ans_size = ans.size();
 	depth = 0;
 
-	if(ans_size < 5)
-		glb_depth = 6;
-	else
-		glb_depth = 4;
-
 	std::cerr<<"----left:"<<o.count(0)<<endl;
-	order_ans = m_order(ans,depth);	
+	order_ans = m_order(ans,depth);
+	std::cerr<<"****left:"<<o.count(0)<<endl;
 
 	init_color = (o.mycolor==1)?2:1;
 
@@ -62,7 +57,7 @@ pair<int, int> othello_ai::get(){
 			|| (ans[i].first == 15 && ans[i].second == 15)
 			)
 		{
-			std::cerr<<"get corner:<"<<ans[i].first<<","<<ans[i].second<<">\n";
+			std::cerr<<"get corner:<,"<<ans[i].first<<","<<ans[i].second<<">\n";
 			return ans[i];
 		}			
 
@@ -113,27 +108,15 @@ int othello_ai::eval_node(int depth,int color,int cmp_val){
 
 	int best_value,temp_value;
 	int op_col;
-	int end_col;
 	int end_op;
 	vector<pair<int,int> >  ans; 
 	vector<pair<int,int> >  order_ans; 
 	int chd_size;
 	string ori_string; //保持起初的局面
 
-	end_col = (o.mycolor == 1)?2:1;
 	op_col = (color==1)?2:1;
 	best_value = (depth%2==0)?-0x4000000:0x4000000;
-	ori_string = o.tostring();	
-
-	if(o.count(o.mycolor) == 0){
-		std::cerr<<"get wiped out..\n";
-		return -0x888888;
-	}
-
-	if(o.count(end_col) == 0){
-		std::cerr<<"wipe out op..\n";
-		return 0x888888;
-	}
+	ori_string = o.tostring();
 
 	if(!o.canmove(color)){  //color颜色方无法走		
 		if(!o.canmove(op_col)){
@@ -166,7 +149,7 @@ int othello_ai::eval_node(int depth,int color,int cmp_val){
 		}		
 	}
 
-	if(depth == glb_depth){  // 达到指定的搜索深度						
+	if(depth == 4){  // 达到指定的搜索深度				
 		return get_eval(o.tostring(),0);		
 	}
 
@@ -388,7 +371,7 @@ int othello_ai::get_eval(string s,int g)
    		if(o.count(0) > 200)   //begin game
 			score =10000 * corner_val + 6000 * side_val+ 90*front_val;
 		else      //mid game
-			score = 10*pown_val + 10000 * corner_val + 6000 * side_val + 300* mv_val + 400*front_val + 80*pown_3 + 10 * p_val;			
+			score = 10*pown_val + 10000 * corner_val + 6000 * side_val + 300* mv_val + 400*front_val + 10 * p_val;			
    }
    else	
    		score = 8*pown_val + 10000 * corner_val + 6000 * side_val + 300 * mv_val + 400*front_val + 8 * p_val;	
