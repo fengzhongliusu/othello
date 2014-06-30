@@ -44,7 +44,6 @@ pair<int, int> othello_ai::get(){
 	ans_size = ans.size();
 	depth = 0;
 
-	std::cerr<<"----left:"<<o.count(0)<<endl;
 	order_ans = m_order(ans,depth);
 	std::cerr<<"****left:"<<o.count(0)<<endl;
 
@@ -62,12 +61,10 @@ pair<int, int> othello_ai::get(){
 		}			
 
 
-	std::cerr<<"\nroot--->move size: "<<ans_size<<endl;		
 	for(int i=0; i<ans_size; i++){
 
 		o.play(o.mycolor,order_ans[i].first,order_ans[i].second);
 		temp_value = eval_node(depth+1,init_color,b_value);
-		std::cerr<<"move["<<i<<"] value:"<<temp_value<<endl;
 		o.init(o.mycolor,ori_string);
 
 		if(temp_value == 0x4000000)
@@ -101,10 +98,8 @@ pair<int, int> othello_ai::get(){
 
 
 int othello_ai::eval_node(int depth,int color,int cmp_val){
-	if(get_time()>1800){ //超时
-		std::cerr<<"timeout..\n";
-		return 0x4000000;
-	}	
+	if(get_time()>1800) //超时		
+		return 0x4000000;	
 
 	int best_value,temp_value;
 	int op_col;
@@ -187,7 +182,6 @@ int othello_ai::eval_node(int depth,int color,int cmp_val){
 int othello_ai::get_eval(string s,int g)
 {	
 	int my_pown=0,op_pown=0;
-	int pown_3 = 0;
 	int p_val = 0;
 	int my_corner = 0, op_corner = 0;
 	int my_c_s = 0, op_c_s = 0;
@@ -199,7 +193,6 @@ int othello_ai::get_eval(string s,int g)
 	int x,y;	
 	double score;
 	double pown_val, mv_val, front_val, corner_val, side_val;
-
 
 	//corner 
 	if(o.is(o.mycolor,0,0)) my_corner++;
@@ -260,7 +253,6 @@ int othello_ai::get_eval(string s,int g)
 		return score;		
 	}
 	
-
 	//count pown
 	for(int i=0; i<16; i++)
 		for(int j=0; j<16; j++){
@@ -300,59 +292,7 @@ int othello_ai::get_eval(string s,int g)
 	else if(my_front_pown < op_front_pown)
 		front_val = 100.0 * op_front_pown/ (my_front_pown + op_front_pown);
 	else 
-		front_val = 0;
-
-	//corner side side
-	if(o.is(0,0,0) && o.is(0,0,1) && o.is(0,1,0) && o.is(0,1,1)){
-		if(o.is(o.mycolor,0,2)) my_s_3++;
-		else if(o.is(op_color,0,2)) op_s_3++;
-		if(o.is(o.mycolor,1,2)) my_s_3++;
-		else if(o.is(op_color,1,2)) op_s_3++;
-		if(o.is(o.mycolor,2,2)) my_s_3++;
-		else if(o.is(op_color,2,2)) op_s_3++;	
-		if(o.is(o.mycolor,2,0)) my_s_3++;
-		else if(o.is(op_color,2,0)) op_s_3++;	
-		if(o.is(o.mycolor,2,1)) my_s_3++;
-		else if(o.is(op_color,2,1)) op_s_3++;	
-	}
-	if(o.is(0,0,15) && o.is(0,0,14) && o.is(0,1,14) && o.is(0,1,15)){
-		if(o.is(o.mycolor,0,13)) my_s_3++;
-		else if(o.is(op_color,0,13)) op_s_3++;
-		if(o.is(o.mycolor,1,13)) my_s_3++;
-		else if(o.is(op_color,1,13)) op_s_3++;
-		if(o.is(o.mycolor,2,13)) my_s_3++;
-		else if(o.is(op_color,2,13)) op_s_3++;
-		if(o.is(o.mycolor,2,14)) my_s_3++;
-		else if(o.is(op_color,2,14)) op_s_3++;
-		if(o.is(o.mycolor,2,15)) my_s_3++;
-		else if(o.is(op_color,2,15)) op_s_3++;
-	}
-	if(o.is(0,15,0) && o.is(0,15,1) && o.is(0,14,0) && o.is(0,14,1)){
-		if(o.is(o.mycolor,13,0)) my_s_3++;
-		else if(o.is(op_color,13,0)) op_s_3++;
-		if(o.is(o.mycolor,13,1)) my_s_3++;
-		else if(o.is(op_color,13,1)) op_s_3++;
-		if(o.is(o.mycolor,13,2)) my_s_3++;
-		else if(o.is(op_color,13,2)) op_s_3++;	
-		if(o.is(o.mycolor,14,2)) my_s_3++;
-		else if(o.is(op_color,14,2)) op_s_3++;	
-		if(o.is(o.mycolor,15,2)) my_s_3++;
-		else if(o.is(op_color,15,2)) op_s_3++;	
-	}
-	if(o.is(0,14,14) && o.is(0,14,15) && o.is(0,15,14) && o.is(0,15,15)){
-		if(o.is(o.mycolor,15,13)) my_s_3++;
-		else if(o.is(op_color,15,13)) op_s_3++;
-		if(o.is(o.mycolor,14,13)) my_s_3++;
-		else if(o.is(op_color,14,13)) op_s_3++;
-		if(o.is(o.mycolor,13,13)) my_s_3++;
-		else if(o.is(op_color,13,13)) op_s_3++;
-		if(o.is(o.mycolor,13,14)) my_s_3++;
-		else if(o.is(op_color,13,14)) op_s_3++;
-		if(o.is(o.mycolor,13,15)) my_s_3++;
-		else if(o.is(op_color,13,15)) op_s_3++;
-	}
-	pown_3 = 10 * (my_s_3 - op_s_3);
-
+		front_val = 0;	
 
 	//mobility
 	int size1=0, size2=0;
@@ -368,8 +308,8 @@ int othello_ai::get_eval(string s,int g)
 		mv_val = 0;
 
    if(g == 0){
-   		if(o.count(0) > 200)   //begin game
-			score =10000 * corner_val + 6000 * side_val+ 90*front_val;
+   		if(o.count(o.mycolor) < 8)   //begin game
+			score =10*pown_val+10000 * corner_val + 6000 * side_val + 10 * p_val;
 		else      //mid game
 			score = 10*pown_val + 10000 * corner_val + 6000 * side_val + 300* mv_val + 400*front_val + 10 * p_val;			
    }
@@ -402,6 +342,8 @@ int othello_ai::value(int x,int y)
 		return val[15-x][15-y];
 }
 
+
+//优化剪枝节点排序
 vector<pair<int, int> > othello_ai::m_order(vector<pair<int, int> > ans,int depth)
 {	
 	if(get_time() > 1800)
