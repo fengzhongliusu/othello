@@ -5,27 +5,27 @@
 #include "gamti.h"
 
 class othello_ai{
-	othello16 o;//实例化othello16类		
+	othello16 o;//瀹炰緥鍖杘thello16绫�		
 	int pari;
 	public:
 	void init(int color, string s);
 	void move(int color, int x, int y);
 	pair<int, int> get();
-	int get_eval(string s,int g);   //算出给定局面的估价值
-	int value(int x,int y);   //获取每一个点的估价值
-	int eval_node(int depth,int color,int cmp_val);  //返回倒退值
+	int get_eval(string s,int g);   //绠楀嚭缁欏畾灞€闈㈢殑浼颁环鍊�
+	int value(int x,int y);   //鑾峰彇姣忎竴涓偣鐨勪及浠峰€�
+	int eval_node(int depth,int color,int cmp_val);  //杩斿洖鍊掗€€鍊�
 	int jdg_side(int x,int y);
 	vector<pair<int, int> > m_order(vector<pair<int, int> > ans,int depth);
 };
 
 void othello_ai::init(int color, string s){
 	std::cerr<<"my color: "<<color<<endl;
-	o.init(color, s);//让sdk初始化局面
+	o.init(color, s);//璁﹕dk鍒濆鍖栧眬闈�
 }
 
 void othello_ai::move(int color, int x, int y){
 	std::cerr<<"move: <"<<color<<","<<x<<","<<y<<">\n";
-	o.play(color, x, y);//告诉sdk落子情况,改变局面
+	o.play(color, x, y);//鍛婅瘔sdk钀藉瓙鎯呭喌,鏀瑰彉灞€闈�
 }
 
 pair<int, int> othello_ai::get(){
@@ -37,7 +37,7 @@ pair<int, int> othello_ai::get(){
 	vector<pair<int,int> > order_ans;
 	
 	pari = (o.count(0)%2==0)?1:0;	
-	ori_string = o.tostring(); //保存初始局面
+	ori_string = o.tostring(); //淇濆瓨鍒濆灞€闈�
 	b_index = 0;
 	b_value = -0x4000000;
    	ans = o.allmove(o.mycolor);
@@ -57,7 +57,7 @@ pair<int, int> othello_ai::get(){
 			|| (ans[i].first == 15 && ans[i].second == 15)
 			)
 		{
-			std::cerr<<"get corner:<,"<<ans[i].first<<","<<ans[i].second<<">\n";
+			std::cerr<<"get corner:<"<<ans[i].first<<","<<ans[i].second<<">\n";
 			return ans[i];
 		}			
 
@@ -76,11 +76,11 @@ pair<int, int> othello_ai::get(){
 		if(temp_value == 0x888888)	//win		
 			return order_ans[i];				
 
-		if(temp_value == -0x888888)  //lose
+		if(temp_value == -0x888888 || temp_value == -0x999999)  //lose or even to odd
 			continue;
 
 		if(temp_value == 0x999999){  //odd to even
-			std::cerr<<"pari:<<"<<order_ans[i].first<<","<<order_ans[i].second<<endl;			
+			std::cerr<<"pari:<<"<<order_ans[i].first<<","<<order_ans[i].second<<">>\n";			
 			if(jdg_side(order_ans[i].first,order_ans[i].second)==1)
 				continue;
 			else{
@@ -101,7 +101,7 @@ pair<int, int> othello_ai::get(){
 
 
 int othello_ai::eval_node(int depth,int color,int cmp_val){
-	if(get_time()>1800){ //超时
+	if(get_time()>1800){ //瓒呮椂
 		std::cerr<<"timeout..\n";
 		return 0x4000000;
 	}	
@@ -112,13 +112,13 @@ int othello_ai::eval_node(int depth,int color,int cmp_val){
 	vector<pair<int,int> >  ans; 
 	vector<pair<int,int> >  order_ans; 
 	int chd_size;
-	string ori_string; //保持起初的局面
+	string ori_string; //淇濇寔璧峰垵鐨勫眬闈�
 
 	op_col = (color==1)?2:1;
 	best_value = (depth%2==0)?-0x4000000:0x4000000;
 	ori_string = o.tostring();
 
-	if(!o.canmove(color)){  //color颜色方无法走		
+	if(!o.canmove(color)){  //color棰滆壊鏂规棤娉曡蛋		
 		if(!o.canmove(op_col)){
 			if(color == o.mycolor){
 				if(o.count(o.mycolor) >= o.count(op_col)){
@@ -149,11 +149,11 @@ int othello_ai::eval_node(int depth,int color,int cmp_val){
 		}		
 	}
 
-	if(depth == 4){  // 达到指定的搜索深度				
+	if(depth == 4){  // 杈惧埌鎸囧畾鐨勬悳绱㈡繁搴�				
 		return get_eval(o.tostring(),0);		
 	}
 
-	ans = o.allmove(color);  //获取所有可下位置列表
+	ans = o.allmove(color);  //鑾峰彇鎵€鏈夊彲涓嬩綅缃垪琛�
 	chd_size = ans.size();	
 
 	for(int i=0;i<chd_size;i++){
@@ -165,13 +165,13 @@ int othello_ai::eval_node(int depth,int color,int cmp_val){
 			return 0x4000000;
 		}
 
-		if(temp_value == 0x888888 || temp_value == -0x888888 || temp_value == 0x999999)
+		if(temp_value == 0x888888 || temp_value == -0x888888 || temp_value == 0x999999 || temp_value ==-0x999999)
 			return temp_value;
 		
-		if(depth % 2 == 0 && cmp_val <= temp_value){   //beta减枝			        	
+		if(depth % 2 == 0 && cmp_val <= temp_value){   //beta鍑忔灊			        	
 			return temp_value;
 		}
-		if(depth % 2 != 0 && cmp_val >= temp_value){   //alpha减枝			        	
+		if(depth % 2 != 0 && cmp_val >= temp_value){   //alpha鍑忔灊			        	
 			return temp_value;
 		}
 
@@ -369,9 +369,9 @@ int othello_ai::get_eval(string s,int g)
 
    if(g == 0){
    		if(o.count(0) > 226)   //begin game
-			score = 15*pown_val + 10000 * corner_val + 6000 * side_val +15*p_val;	
+			score = 10000 * corner_val + 6000 * side_val + 80 * mv_val;	
 		else      //mid game
-			score = 10*pown_val + 10000 * corner_val + 6000 * side_val + 80 * mv_val + 90*front_val + 10 * p_val;			
+			score = 10*pown_val + 10000 * corner_val + 6000 * side_val + 110 * mv_val + 90*front_val + 10 * p_val;			
    }
    else	
    		score = 8*pown_val + 10000 * corner_val + 6000 * side_val + 300 * mv_val + 400*front_val + 8 * p_val;	
@@ -384,12 +384,12 @@ int othello_ai::value(int x,int y)
 	int val[16][16] = {
 		{40,0,20,20,20,13,12,12},
 		{0,0,2,2,2,2,2,2},
-		{20,2,8,8,8,8,8,8},
-		{20,2,8,3,3,3,3,3},
-		{20,2,8,3,4,4,4,4},
-		{13,2,8,3,4,2,2,2},
-		{12,2,8,3,4,2,1,1},
-		{12,2,8,3,4,2,1,0}		
+		{20,2,6,6,6,6,6,6},
+		{20,2,6,3,3,3,3,3},
+		{20,2,6,3,4,4,4,4},
+		{13,2,6,3,4,2,2,2},
+		{12,2,6,3,4,2,1,1},
+		{12,2,6,3,4,2,1,0}		
 	};	
 
 	if(x<8 && y<8)
